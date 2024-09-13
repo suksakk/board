@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic}">
+<!-- >>> th:block - layout:fragment 속성에 이름을 지정해서 실제 컨텐츠 페이지의 내용을 채우는 기능
+        해당 기능은 동적 처리가 필요할 때 사용 <<< -->
+<th:block layout:fragment="title">
+    <title>글작성 페이지</title>
+</th:block>
+
+<!-- >>> layout:fragment="content" - 게시글 등록 페이지는 게시글 정보를 입력할 수 있는 폼이 필요하고, 게시글 리스트 페이지는 게시글 정보를 보여주는 테이블이 필요
+	 즉, 타이틀과 마찬가지로 페이지마다 컨텐츠 영역의 형태가 다르기 때문에 layout:fragment를 이용 <<< -->
+<th:block layout:fragment="content">
+    <div class="page_tits">
+        <h3>게시판 관리</h3>
+        <p class="path"><strong>현재 위치 :</strong> <span>게시판 관리</span> <span>리스트형</span> <span>글작성</span></p>
+    </div>
+
+    <div class="content">
+        <section>
+            <form id="saveForm" method="post" autocomplete="off" enctype="multipart/form-data">
+                <!--/* 게시글 수정인 경우, 서버로 전달할 게시글 번호 (PK) */-->
+                <!-- >>> 여기에 나온 th:if="${post != null}"의 post는 PostController openPostWrite()의 model.addAttribute의 "post" 네임이다. <<< -->
+                <input type="hidden" id="id" name="id" th:if="${post != null}" th:value="${post.id}"/>
+
+                <!--/* 서버로 전달할 공지글 여부 */-->
+                <input type="hidden" id="noticeYn" name="noticeYn"/>
+
+                <!--/* 삭제 처리할 파일 번호 */-->
+                <input type="hidden" id="removeFileIds" name="removeFileIds"/>
+
+                <table class="tb tb_row">
+                    <colgroup>
+                        <col style="width:15%;"/>
+                        <col style="width:35%;"/>
+                        <col style="width:15%;"/>
+                        <col style="width:35%;"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th scope="row">공지글</th>
+                        <td><span class="chkbox"><input type="checkbox" id="isNotice" name="isNotice"
+                                                        class="chk"/><i></i><label for="isNotice"> 설정</label></span>
+                        </td>
+
+                        <th scope="row">등록일</th>
+                        <td colspan="3"><input type="text" id="createdDate" name="createdDate" readonly/></td>
+                    </tr>
+
+                    <tr>
+                        <th>제목 <span class="es">필수 입력</span></th>
+                        <td colspan="3"><input type="text" id="title" name="title" maxlength="50"
+                                               placeholder="제목을 입력해 주세요."/></td>
+                    </tr>
+
+                    <tr>
+                        <th>이름 <span class="es">필수 입력</span></th>
+                        <td colspan="3"><input type="text" id="writer" name="writer" maxlength="10"
+                                               placeholder="이름을 입력해 주세요."/></td>
+                    </tr>
+
+                    <tr>
+                        <th>내용 <span class="es">필수 입력</span></th>
+                        <td colspan="3"><textarea id="content" name="content" cols="50" rows="10"
+                                                  placeholder="내용을 입력해 주세요."></textarea></td>
+                    </tr>
+                    <tr>
+                        <th>첨부파일</th>
+                        <td colspan="3">
+                            <div class="file_list">
+                                <div>
+                                    <div class="file_input">
+                                        <input type="text" readonly/>
+                                        <label> 첨부파일
+                                            <input type="file" name="files" onchange="selectFile(this);"/>
+                                        </label>
+                                    </div>
+                                    <button type="button" onclick="removeFile(this);" class="btns del_btn">
+                                        <span>삭제</span></button>
+                                    <button type="button" onclick="addFile();" class="btns fn_add_btn">
+                                        <span>파일 추가</span></button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+            <p class="btn_set">
+                <button type="button" id="saveBtn" onclick="savePost();" class="btns btn_st3 btn_mid">저장</button>
+                <button type="button" onclick="goListPage();" class="btns btn_bdr3 btn_mid">뒤로</button>
+            </p>
+        </section>
+    </div> <!--/* .content */-->
+</th:block>
+
+<!-- 자바스크립트도 마찬가지로 페이지마다 로직이 다르기 때문에 layout:fragment를 이용-->
+<!-- th:inline="javascript" - <script> 태그에 th:inline 속성을 javascript로 선언해야 자바스크립트 내에서 타임리프 문법 사용 가능 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        // >>> <![CDATA[]> - 타임리프 '<', '>' 태그를 엄격하게 검사하기 때문에 자바스크립트 코드는 꼭 CDATA로 묶어줘야 한다 <<<
+        /*<![CDATA[*/
+
+        // 익명함수는 자바스크립트에서 전역 변수의 문제점을 해결하는 방법 중 하나
+        // 기존에는 업로드된 첨부파일이 삭제될 때 삭제된 파일의 id(PK)를 담는 용도로 익명함수를 이용
+        // 파일 삭제 처리용 익명 함수
+        const removeFileId = (function () {
+            // ids - 첨부파일이 변경 또는 삭제 되었을 때, 삭제 처리할 첨부파일의 id를 저장하는 용도의 배열(Array)이다
+            const ids = [];
+            return {
+                // ids에 삭제 처리할 첨부파일의 id를 추가한다. ids.includes()를 이용하면 배열 안에 중복되어있는 값이
+                // 있는지 체크할 수 있으며, 중복되는 값이 없는 경우에만 ids에 id를 추가한다.
+                add(id) {
+                    if (ids.includes(id)) {
+                        return false;
+                    }
+                    ids.push(id);
+                }, // ids에 담긴, 변경 또는 삭제된 모든 파일의 id를 조회
+                getAll() {
+                    return ids;
+                }
+            }
+        }());
+
+        // >>> window.onload() - 자바스크립트의 onload이벤트로, 페이지가 로딩되는 시점에 단 한 번만 실행되는 코드.
+        // 게시글 상세정보는 접속 시 한 번만 보여주면 되기 때문에 여러 번 호출 불필요 <<<
+        window.onload = () => {
+            renderPostInfo();
+
+            findAllFile();
+        }
+
+        // 전체 파일 조회
+        function findAllFile() {
+
+            // 1. 신규 등록/수정 체크
+            // 게시글의 신규 등록/수정을 체크한다. 신규등록일 경우에는 첨부파일을 조회할 필요가 없기 때문에 로직을 종료
+
+            const post = [[${post}]];
+            if (!post) {
+                return false;
+            }
+
+            // 2. API 호출
+            // view.html에 선언한 findAllFile()의 1번 2번 로직과 동일
+            const response = getJson(`/posts/${post.id}/files`);
+
+            // 3. 로직 종료
+            // view.html에 선언한 findAllFile()의 1번 2번 로직과 동일
+            if (!response.length) {
+                return false;
+            }
+
+            // 4. 업로드 영역 추가
+            // addFile()의 함수 구조는 command + F를 눌러 addFile() 함수를 찾아 확인
+            // addFIle() 함수는 첨부파일 영역에 업로드 HTML을 추가해 주는 기능을 한다
+            // 여기서 포인트는 for 문의 반복 조건을 (업로드된 첨부파일 개수(response.length) - 1)로 선언했다는 점이다
+            // write.html의 입력 폼(saveForm)에는 기본적으로 메인 첨부파일 영역이 있기 때문에, 업로드된 첨부파일 개수보다 1개 적게 파일 영역이 추가되어야 한다
+            for (let i = 0, len = (response.length - 1); i < len; i++) {
+                addFile();
+            }
+
+            // 5. 파일 선택 & 삭제 이벤트 재선언 & 파일명 세팅
+            // forEach()는 filenameInputs의 길이(length)만큼 반복된다 여기서 포인트는 4번 로직이 종료된 시점에,
+            // 첨부파일 영역의 개수와 response에 담긴 파일 응답 개수가 같다는 점이다 즉, forEach()의 'input'과 'response[i]'는 1:1로 매칭
+            // filenameInputs를 순환하며 실행되는 메인 로직에서 변수 fileInput은 file 타입의 input을 의미하며, 이 엘리먼트는 파일 선택창에서
+            // 파일을 업로드하는 시점에 selectFile()을 실행, fileRemoveBtn은 파일삭제 버튼을 의미하며, 이 엘리먼트는 업로드된 첨부파일을 삭제하는 시점에
+            // removeFile()을 실행 기존에는 두 엘리먼트 모두 함수의 인자로 자신을 의미하는 'this'만 전달했으나 기존에 업로드된 첨부파일의 변경(수정)과
+            // 삭제처리를 위해 setAttribute()로 함수를 재선언 하는 과정에서 파일의 id값을 함께 전달
+            // 마지막으로 DB에 저장된 원본 파일명(originalName)을 text 타입의 input value로 세팅한다
+            const filenameInputs = document.querySelectorAll('.file_list input[type="text"]');
+            filenameInputs.forEach((input, i) => {
+                const fileInput = input.nextElementSibling.firstElementChild;
+                const fileRemoveBtn = input.parentElement.nextElementSibling;
+                fileInput.setAttribute('onchange', `selectFile(this, ${response[i].id})`);
+                fileRemoveBtn.setAttribute('onclick', `removeFile(this, ${response[i].id})`);
+                input.value = response[i].originalName;
+            })
+        }
+
+        // 게시글 상세정보 렌더링
+        // >>> renderPostInfo() - 게시글 상세정보를 화면에 렌더링 하는 역할 함수, 신규 게시글 작성은 post 객체를
+        // 화면에 전달하지 않기에 오늘 날짜를 렌더링 한 후 로직 종료후, 기존 게시글 수정하는 경우 메인 로직 실행 <<<
+        function renderPostInfo() {
+            const post = [[${post}]];
+
+            if (!post) {
+                initCreatedDate();
+                return false;
+            }
+
+            const form = document.getElementById('saveForm');
+            const fields = ['id', 'title', 'content', 'writer', 'noticeYn'];
+            form.isNotice.checked = post.noticeYn;
+            form.createdDate.value = dayjs(post.createdDate).format('YYYY-MM-DD HH:mm');
+
+            fields.forEach(field => {
+                form[field].value = post[field];
+            })
+        }
+
+
+        // 등록일 초기화
+        // >>> initCreatedDate() - 해당 함수는 신규 게시글을 등록할 때, 등록일에 오늘 날짜를 렌더링을 해주는 역할 dayjs는 JS 영역에서
+        // 날짜 데이터를 쉽게 컨트롤 할 수 있도록 도와주는 라이브러리이다. body.html 하단에 <script src = "https://cdn...dayjs.min.js> 코드를 통해 dayjs
+        // 라이브러리를 import 해서 사용 <<<
+        function initCreatedDate() {
+            document.getElementById('createdDate').value = dayjs().format('YYYY-MM-DD');
+        }
+
+        // 게시글 저장(수정)
+        // savePost() - 해당 함수는 저장하기 버튼의 onclick 이벤트를 통해 실행 const form ~~ isVaild();까지의 코드는 유효성 검사 코드다
+        // fields에는 제목, 이름, 내용 필드를, fieldNames에는 각 필드의 이름을 담아 반복문 안에서 isVaild() 함수를 호출해 값이 입력되지 않은 필드를 탐색
+        // isValid() - 함수는 static 폴더에 있는 function.js에 선언된 함수이다. 이 함수는 해당 필드의 value 값을 체크해서, 값이 비어있는 경우 해당 필드로
+        // 포커싱 해주는 역할을 하는 함수이다
+        function savePost() {
+            const form = document.getElementById('saveForm');
+            const fields = [form.title, form.writer, form.content];
+            const fieldNames = ['제목', '이름', '내용'];
+
+            for (let i = 0, len = fields.length; i < len; i++) {
+                isValid(fields[i], fieldNames[i]);
+            }
+
+            new URLSearchParams(location.search).forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.append(input);
+            })
+
+            // 데이터 중복 저장을 방지하기 위한 로직, 저장 버튼을 클릭한 상태에서 한 번 더 클릭하면 같은 내용의 게시글이 두 개 저장된다. 이러한 상황을 방지하고자
+            // 저장 로직이 실행되었을 때 저장 버튼이 작동하지 않도록 비활성화 한다.
+            document.getElementById('saveBtn').disabled = true;
+            // 공지글 여부의 값을 세팅하는 로직 공지글 설정이 체크되어 있으면 true 아니면 false로 hidden 타입의 noticeYn 필드 값 세팅
+            form.noticeYn.value = form.isNotice.checked;
+            // 익명 함수 removeFileIds.getAll()을 이용해서 ids에 담긴 모든 첨부파일 번호를 가저온 후 join()을 통해 배열에 담긴 모든 값을 콤마(', ')로 연결합니다.
+            form.removeFileIds.value = removeFileId.getAll().join(); // 추가
+            // action을 설정하는 로직, 컨트롤러에서 전달받은 게시글 응답 객체(post)의 유무에 따라 신규저장 save.do or 수정후 저장 update.do를 의미
+            form.action = [[${post == null
+        }]]
+                ? '/post/save.do' : '/post/update.do';
+            form.submit(); // form.submit()을 호출해서 폼 데이터(파라미터)를 서버(컨트롤러)로 전달.
+        }
+
+        // 게시글 리스트 페이지로 이동
+        function goListPage() {
+            const queryString = new URLSearchParams(location.search);
+            queryString.delete('id');
+            location.href = '/post/list.do' + '?' + queryString.toString();
+        }
+
+
+        // 파일 선택
+        // selectFile() - 파일 다이얼로그(선택) 창에서 파일이 선택(열기) 또는 취소되었을 때 실행되는 onchange 함수로,
+        // 파일에 변화가 생겼을 때 실행되는 이벤트이다. 함수의 인자로 전달하는 this는 file 타입의 input 태그, 즉 자기 자신(엘레먼트)을 의미
+        // 해당 함수에서 핵심 변수는 file이다 file에는 파일 선택 창에서 업로드한 파일 객체가 담기며, 서버로 폼 전송했을 때, 이 파일 객체가
+        // MultipartFile 타입으로 전송된다.
+        function selectFile(element, id) {
+
+            // 메인 로직 먼저 file은 file 타입의 input(이하 file)에 담긴 파일 객체를 filename은 text 타입의 input에 담기는 파일명을 의미
+            const file = element.files[0];
+            const filename = element.closest('.file_input').firstElementChild;
+
+            // 1. 파일 선택 창에서 취소 버튼이 클릭된 경우
+            // 1번 로직은 파일 선택 창이 취소된(닫힌) 경우에 실행, 이때 files의 value는 초기화되므로, filename을 빈 값으로 초기화 한 로직을 종료
+            if (!file) {
+                filename.value = '';
+                return false;
+            }
+
+            // 2. 파일 크기가 10MB를 초과하는 경우
+            // 2번 로직은 업로드된 파일의 size(바이트 단위)를 MB 단위로 변경해서 파일 크기를 체크
+            // 바이트 단위의 숫자를 1024로 두번 나누면 MB단위가 된다 Math.floor()를 이용해서
+            // 소수점은 제거하고 파일 사이즈가 10MB를 초과하면 filename과 files의 value를 초기화하고 로직을 종료
+            const fileSize = Math.floor(file.size / 1024 / 1024);
+            if (fileSize > 10) {
+                alert('10MB 이하의 파일로 업로드해 주세요.');
+                filename.value = '';
+                element.value = '';
+                return false;
+            }
+
+            // 3. 파일명 지정
+            // 3번 로직을 통해 업로드된 파일의 원본 이름을 filename에 세팅
+            filename.value = file.name;
+
+            // 4. 삭제할 파일 id 추가
+            // 신규 게시글을 등록하는 시점에는 파일 id가 넘어올 일이 절대로 없기 때문에 if 조건으로 id가 넘어 왔는지 체크한다.
+            // 기존에 업로드된 파일이 변경되면, 익명함수 removeFileId의 ids에 삭제 처리할 첨부파일의 id를 추가한다
+            if (id) {
+                removeFileId.add(id);
+            }
+        }
+
+
+        // 파일 추가
+        // 파일 추가 버튼과 연결된 onclick 이벤트, addFile()을 실행하면 첨부파일 영역이 하나씩 추가된다
+        // fileDiv의 HTML은 form에 추가한 HTML에서 파일 추가 버튼만 제거되었고 나머지는 동일
+        function addFile() {
+
+            const fileDiv = document.createElement('div');
+            fileDiv.innerHTML = `
+                <div class="file_input">
+                    <input type="text" readonly />
+                    <label> 첨부파일
+                        <input type="file" name="files" onchange="selectFile(this);" />
+                    </label>
+                </div>
+                <button type="button" onclick="removeFile(this);" class="btns del_btn"><span>삭제</span></button>
+            `;
+            document.querySelector('.file_list').appendChild(fileDiv);
+        }
+
+        // 파일 삭제
+        // 삭제 버튼과 연결된 onclick 이벤트 removeFile()의 this는 영역별 삭제 버튼 자신의 의미하며, if 문의 조건은 파일 추가 버튼의 유무, 즉 첫 번째 파일이 삭제된 경우
+        // 첫 번째 파일 영역에는 파일 추가버튼이 있기 때문에 div.file_input 안의 모든 input을 찾아 값을 초기화하고,
+        // 그 외 나머지는 addFile()로 추가한 파일 영역(div) 자체를 DOM에서 제거한다.
+        function removeFile(element, id) {
+            // 1. 삭제할 파일 id 추가
+            // 추가된 1번 로직은 익명함수인 removeFileId의 ids에 삭제할 첨부파일의 id를 추가한다
+            if (id) {
+                removeFileId.add(id);
+            }
+
+            // 2. 파일 영역 초기화 & 삭제
+            // 삭제 버튼 우측에 파일 추가 버튼이 있는 경우에는 해당 파일 영역의 모든 input value를 초기화하고, 아닌 경우에는 파일 영역 자체를 DOM에서 제거
+            const fileAddBtn = element.nextElementSibling;
+            if (fileAddBtn) {
+                const inputs = element.previousElementSibling.querySelectorAll('input');
+                inputs.forEach(input => input.value = '')
+                return false;
+            }
+            element.parentElement.remove();
+        }
+
+        /*]]>*/
+    </script>
+</th:block>
+</html>

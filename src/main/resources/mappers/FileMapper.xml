@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.domain.file.FileMapper">
+
+    <!-- tb_file 테이블 전체 컬럼 -->
+    <!-- 이 컬럼의 이름은 DB에 저장된 테이블 이름과 동일 -->
+    <sql id="fileColumns">
+        id
+        , post_id
+        , original_name
+        , save_name
+        , size
+        , delete_yn
+        , created_date
+        , deleted_date
+    </sql>
+
+    <!-- 파일 정보 저장 -->
+    <!-- saveAll() - MyBatis에서 foreach 태그를 사용하면 Collection 타입의 객체를 처리할 수 있다. item 속성의 file은 List에 담긴 FileRequest 객체이고,
+       collection 속성의 list는 파라미터 타입의 의미하며, separator의 ','는 각 쿼리를 분리할 구분자를 의미 -->
+    <!-- ex) List에 세 개의 객체가 담겨 있다고 했을 때 아래와 같은 형태로 SQL 쿼리가 실행
+       INSERT INTO tb_file (
+        ...
+       ) VALUES
+       (
+        ...
+       ),
+       (
+        ...
+       ),
+       이런식이다 -->
+    <insert id="saveAll" parameterType="list">
+        INSERT INTO tb_file (
+        <include refid="fileColumns"/>
+        ) VALUES
+        <foreach item="file" collection="list" separator=",">
+            (
+            #{file.id}
+            , #{file.postId}
+            , #{file.originalName}
+            , #{file.saveName}
+            , #{file.size}
+            , 0
+            , NOW()
+            , NULL
+            )
+        </foreach>
+    </insert>
+
+    <!-- 파일 리스트 조회 -->
+    <!-- 게시글에 업로드된 모든 첨부파일을 조회, 게시글과 댓글은 리스트 조회 쿼리의 정렬(ORDER BY) 기준을 id 내림차순(DESC)로 했지만,
+       첨부파일은 업로한 순서가 유지되어야 하기 때문에 id를 오름차순(ASC)으로 정렬 -->
+    <select id="findAllByPostId" parameterType="long" resultType="com.study.domain.file.FileResponse">
+        SELECT
+        <include refid="fileColumns"/>
+        FROM
+        tb_file
+        WHERE
+        delete_yn = 0
+        AND post_id = #{value}
+        ORDER BY
+        id
+    </select>
+
+    <!-- 파일 리스트 조회 -->
+    <!-- MyBatis의 foreach를 이용해서 ids에 해당되는 모든 첨부파일을 조회 앞에서 말한 용도는 뒤에 설명 -->
+    <select id="findAllByIds" parameterType="list" resultType="com.study.domain.file.FileResponse">
+        SELECT
+        <include refid="fileColumns"/>
+        FROM
+        tb_file
+        WHERE
+        delete_yn = 0
+        AND id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY
+        id
+    </select>
+
+    <!-- 파일 삭제 -->
+    <!-- MyBatis의 foreach를 이용해서 ids에 해당되는 모든 첨부파일을 삭제 처리 -->
+    <delete id="deleteAllByIds" parameterType="list">
+        UPDATE tb_file
+        SET
+        delete_yn = 1
+        , deleted_date = NOW()
+        WHERE
+        id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 파일 상세정보 조회 -->
+    <select id="findById" parameterType="long" resultType="com.study.domain.file.FileResponse">
+        SELECT
+        <include refid="fileColumns"/>
+        FROM
+        tb_file
+        WHERE
+        delete_yn = 0
+        AND id = #{value}
+    </select>
+</mapper>

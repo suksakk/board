@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/fragments/header :: main-head}"></head>
+<body>
+<!-- MessageDto -> Map 타입으로 선언된 data를 순환해서 각 데이터의 key-value를 hidden 타입의 input으로 추가
+    th:if 조건을 통해 data가 비어있지 않은 경우에만 폼 엘리먼트를 그린다.-->
+<form th:if="${not #maps.isEmpty(param.data)}" id="redirectForm" th:action="params.redirectUri" th:method="${params.method}" style="display: none">
+    <input th:each="key, status : ${params.data.ketSet()}" type="hidden" th:name="${key}" th:value="${params.data.get(key)}"/>
+</form>
+<script th:inline="javascript">
+    /* <![CDATA[ */
+
+    // onload() 컨트롤러에서 전달받은 message가 있는 경우, 사용자에게 alert메시지를 보여준다
+    window.onload = () => {
+        const message = [[ ${params.message} ]];
+        if (message) {
+            alert(message);
+        }
+
+        // if(form) 조건을 통해 HTML 내에 폼태그(엘리먼트)가 있는지 우선적으로 체크,
+        // 앞에서 Map 타입의 객체인 data가 비어있지 않은 경우에만 폼(form) 태그를 HTML에 그린다고 했다.
+        // MessageDto 타입의 객체인 params의 data가 비어있지 않다면 redirectForm을 컨트롤러로 submit 하고,
+        // data가 비어있으면 redirectUri에 해당하는 주소로 이동 즉, data의 유무에 따라 폼 데이터를 submit할지, 단순 주소만 이동할지가 결정
+        const form = document.getElementById('redirectForm');
+        if (form) {
+            form.submit();
+            return false;
+        }
+
+        const redirectUri = [[ ${params.redirectUri} ]];
+        location.href = redirectUri;
+    }
+    /* ]]> */
+</script>
+
+</body>
+</html>

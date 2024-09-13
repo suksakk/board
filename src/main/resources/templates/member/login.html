@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang = "ko">
+<head>
+	<meta http-equiv = "Content-Type" content = "text/html; charset=utf-8" />
+	<meta http-equiv = "X-UA-Compatible" content = "IE=Edge" />
+	<title>로그인</title>
+	<link rel = "stylesheet" th:href = "@{/css/default.css}" />
+	<link rel = "stylesheet" th:href = "@{/css/common.css}" />
+	<link rel = "stylesheet" th:href = "@{/css/content.css}" />
+	<link rel = "stylesheet" th:href = "@{/css/button.css}" />
+	<style>
+        #login_box .signup_btn {
+            background: #42d870;
+            border: 0;
+            border-bottom: solid 3px #4ed177;
+            border-radius: 50px;
+            width: 100%;
+            height: 52px;
+            line-height: 52px;
+            font-size: 16px;
+            color: #fff;
+            text-align: center;
+            margin: 20px 0 15px;
+        }
+	</style>
+</head>
+
+<body>
+<div id = "login_wrap">
+	<div id = "login_box">
+		<div class = "login_con">
+			<div class = "login_tit">
+				<h2>게시판 프로젝트</h2>
+				<p>LOG<i>IN</i></p>
+			</div>
+
+			<div class = "login_input">
+				<form id = "loginForm" onsubmit = "return false;" autocomplete = "off">
+					<ul>
+						<li>
+							<label for = "loginId" class = "skip_info">아이디</label>
+							<input type = "text" id = "loginId" name = "loginId" placeholder = "아이디" title = "아이디" />
+						</li>
+						<li>
+							<label for = "password" class = "skip_info">비밀번호</label>
+							<input type = "password" id = "password" name = "password" title = "비밀번호" placeholder = "비밀번호" />
+						</li>
+					</ul>
+					<button type = "button" onclick = "login();" class = "login_btn">로그인</button>
+					<button type = "button" onclick = "openSignupPopup();" class = "signup_btn">회원가입</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--/* 회원가입 popup */-->
+<!-- 회원가입 페이지를 따로 구성하지 않고 레이어 팝업을 이용해서 회원가입을 처리한다.
+	 댓글 처리에 사용된 레이어 팝업과 동일, 필드 개수에만 차이가 있다. -->
+<div id = "signupPopup" class = "popLayer">
+	<h3>회원가입</h3>
+	<div class = "pop_container">
+		<form id = "signupForm" onsubmit = "return false;" autocomplete = "off">
+			<table class = "tb tb_row tl">
+				<colgroup>
+					<col style = "width:30%;" />
+					<col style = "width:70%;" />
+				</colgroup>
+				<tbody>
+				<tr>
+					<th scope = "row">아이디<span class = "es">필수 입력</span></th>
+					<td>
+						<input type = "text" name = "loginId" placeholder = "아이디" maxlength = "20" style = "width: 80%;" />
+						<button type = "button" id = "idCheckBtn" class = "btns btn_st5" onclick = "checkLoginId();" style = "width: 20%; float: right;">중복 확인</button>
+					</td>
+				</tr>
+				<tr>
+					<th scope = "row">비밀번호<span class = "es">필수 입력</span></th>
+					<td><input type = "password" name = "password" placeholder = "비밀번호" maxlength = "30" /></td>
+				</tr>
+				<tr>
+					<th scope = "row">비밀번호 재입력<span class = "es">필수 입력</span></th>
+					<td><input type = "password" name = "passwordCheck" placeholder = "비밀번호 재입력" maxlength = "30" /></td>
+				</tr>
+				<tr>
+					<th scope = "row">이름<span class = "es">필수 입력</span></th>
+					<td><input type = "text" name = "name" placeholder = "이름" maxlength = "10" /></td>
+				</tr>
+				<tr>
+					<th scope = "row">성별<span class = "es">필수 입력</span></th>
+					<td>
+						<div class = "radio_group">
+							<p class = "radios">
+								<input type = "radio" id = "male" name = "gender" value = "M" checked />
+								<label for = "male">남</label><span class = "check"></span>
+							</p>
+							<p class = "radios">
+								<input type = "radio" id = "female" name = "gender" value = "F" />
+								<label for = "female">여</label><span class = "check"></span>
+							</p>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th scope = "row">생년월일<span class = "es">필수 입력</span></th>
+					<td><input type = "number" name = "birthday" placeholder = "숫자 8자리 입력" /></td>
+				</tr>
+				</tbody>
+			</table>
+		</form>
+		<p class = "btn_set">
+			<button type = "button" class = "btns btn_st2" onclick = "saveMember();">가입</button>
+			<button type = "button" class = "btns btn_bdr2" onclick = "closeSignupPopup();">취소</button>
+		</p>
+	</div>
+	<button type = "button" class = "btn_close" onclick = "closeSignupPopup();"><span><i class = "far fa-times-circle"></i></span></button>
+</div>
+
+<script th:src = "@{/js/function.js}"></script>
+<script th:src = "@{/js/jquery-3.6.0.min.js}"></script>
+<script th:src = "@{/js/common.js}"></script>
+<script src = "https://kit.fontawesome.com/79613ae794.js" crossorigin = "anonymous"></script>
+<script>
+
+	// Enter 로그인 이벤트 바인딩
+	// onload() - 해당 함수 안에 로직은 로그인 페이지의 아이디와 패스워드 필드에서 엔터(Enter)를 입력했을 때 login()을 호출할 수 있도록 이벤트를 바인딩하는 역할
+	window.onload = () => {
+		document.querySelectorAll('#loginId, #password')
+		        .forEach(element => {
+			        element.addEventListener('keyup', (e) => {
+				        if (e.keyCode === 13) {
+					        login();
+				        }
+			        })
+		        })
+	}
+
+
+	// 로그인
+	// login() - MemberController의 login()을 호출해서 로그인을 시도한다. 로그인 성공 시 게시글 리스트 페이지로 이동
+	// 실패하는 경우에 error()안에 alert 메시지를 보여준다
+	// 이 함수는 로그인에 실패했을 때 에러가 발생하는데, @ResponseBody가 선언된 컨트롤러의 메서드가 null을 리턴하면,
+	// Ajax 호출 시 에러가 발생하기 때문에 callApi()를 사용하지 않고 Ajax 함수를 따로 선언했다
+	// 나중에 전역 예외 처리를 배우는 과정에서 에러 메시지를 공통으로 컨트롤러 하는 방법도 설명한다
+	function login() {
+
+		const form = document.getElementById('loginForm');
+
+		if (!form.loginId.value || !form.password.value) {
+			alert('아이디와 비밀번호를 모두 입력해 주세요.');
+			form.loginId.focus();
+			return false;
+		}
+
+		$.ajax({
+			url: '/login',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				loginId: form.loginId.value,
+				password: form.password.value
+			},
+			async: false,
+			success: function (response) {
+				location.href = '/post/list.do';
+			},
+			error: function (request, status, error) {
+				alert('아이디와 비밀번호를 확인해 주세요.');
+			}
+		})
+	}
+
+
+	// 회원가입 팝업 open
+	// openSignupPopup() - 회원가입 팝업을 띄우는 함수다. common.js의 layerPop()을 호출하는 게 전부다.
+	function openSignupPopup() {
+		layerPop('signupPopup')
+	}
+
+
+	// 회원가입 팝업 close
+	// closeSignupPopup() - signupForm 안에 있는 로그인 ID의 읽기모드(readOnly), 중복 확인 버튼의 비활성화(disabled)속성,
+	// 그리고 모든 필드의 값을 초기화 한 후 common.js의 layerPopClose()를 호출해 팝업을 닫는 함수이다.
+	function closeSignupPopup() {
+		const form = document.getElementById('signupForm');
+		form.loginId.readOnly = false;
+		form.querySelector('#idCheckBtn').disabled = false;
+		form.reset();
+		layerPopClose();
+	}
+
+
+	// 아이디 중복 체크
+	// checkLoginId() - 로그인 ID의 중복을 체크하는 함수, MemberController의 countMemberByLoginId()를 호출해서
+	// 사용자가 입력한 ID와 동일한 아이디가 있으면 로직을 종료하고, 없는 경우에는 아이디 결정 여부를 물어 "확인(true)"이 떨어지면
+	// 로그인 ID와 중복 확인 버튼을 각각 읽기모드(readOnly), 비활성화(disabled) 처리
+	// closeSignupPopup()에서 로그인 ID와 중복 확인 버튼을 초기화 하는 이유도 이 때문이다.
+	function checkLoginId() {
+		const loginId = document.querySelector('#signupForm input[name="loginId"]');
+		isValid(loginId, '아이디');
+		const count = getJson(`/member-count`, {loginId: loginId.value});
+
+		if (count > 0) {
+			alert('이미 가입된 아이디가 있습니다.');
+			loginId.focus();
+			return false;
+		}
+
+		if (confirm('사용 가능한 아이디입니다.\n입력하신 아이디로 결정하시겠어요?')) {
+			loginId.readOnly = true;
+			document.getElementById('idCheckBtn').disabled = true;
+		}
+	}
+
+
+	// 회원 정보 유효성 검사
+	// validationMemberInfo() - 회원정보의 유효성을 검사하는 함수이다. 변수 fields는 파라미터로 전달받은 signupForm의 모든 필등 중 성별(radio)
+	// 버튼을 제외한 모든 필드를 의마하고, fieldNames는 fields에 해당하는 필드명을 의미한다.
+	// 사실 정규식을 이용해서 좀 더 디테일하게 로직을 작성할 필요가 있다 설명이 길어져 필수 입력정도만 체크했다. isValid()sms function.js에 선언된 공통함수이다.
+	function validationMemberInfo(form) {
+
+		const fields = form.querySelectorAll('input:not([type="radio"])');
+		const fieldNames = ['아이디', '비밀번호', '빕밀번호 재입력', '이름', '생년월일'];
+
+		for (let i = 0, len = fields.length; i < len; i++) {
+			isValid(fields[i], fieldNames[i]);
+		}
+
+		if (form.loginId.readOnly === false) {
+			alert('아이디 중복 체크를 완료해 주세요.');
+			throw new Error();
+		}
+
+		if (form.password.value !== form.passwordCheck.value) {
+			alert('비밀번호가 일치하지 않습니다.');
+			form.passwordCheck.focus();
+			throw new Error();
+		}
+	}
+
+
+	// 회원 정보 저장 (회원가입)
+	// saveMember() - 폼 데이터(FormData)의 생성자에 form 엘리먼트를 전달하면, form 안에 있는 모든 필드의 name과 value가 formData 객체에 key-value 형식으로 저장
+	// FormData 객체를 forEach()로 순환해서 리터럴 객체인 params에 key-value를 저장, 생년월일을 yyyy-mm-dd 형식으로 치환(replace)한 후 Save API를 호출
+	// 파라미터를 직접 세팅해도 됨, 그러나 필드 개수가 많은 경우에는 그만큼 코드가 길어진다. FormData를 잘 활용하면 이와 가팅 필드의 개수에 상관없이 파라미터를
+	// 쉽게 세팅가능 FormData는 비동기(Ajax) 파일 업로드에도 사용
+	function saveMember() {
+
+		// 1. 필드 유효성 검사
+		const form = document.getElementById('signupForm');
+		validationMemberInfo(form);
+
+		// 2. 파라미터 세팅
+		const params = {}
+		new FormData(form).forEach((value, key) => params[key] = value.trim());
+		params.birthday = params.birthday.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3');
+		
+
+		// 3. Save API 호출
+		callApi('/members', 'post', params);
+		alert('가입을 축하드립니다!\n로그인 후 서비스를 이용해 주세요.');
+		closeSignupPopup();
+	}
+
+</script>
+</body>
+</html>
