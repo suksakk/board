@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,6 @@ import com.study.domain.file.FileRequest;
 import com.study.domain.file.FileResponse;
 import com.study.domain.file.FileService;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 // >>> MVC 패턴 중 C(Controller)에 해당, Model(서비스)과 View(UI == 화면(HTML))의 중간 다리 역할 영역
@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostController {
 
+	@Autowired
 	private final PostService postService;
 	// PostRequest에서 설명했다시피, 파일 업로드는 게시글 생성이 완료 된 후에 처리 되어야 한다
 	// 우선은 PostController의 멤버로 FileService와 FileUtils를 추가
@@ -100,6 +101,7 @@ public class PostController {
 	public String openPostList(@ModelAttribute("params") final SearchDto params, Model model) {
 		PagingResponse<PostResponse> response = postService.findAllPost(params);
 		model.addAttribute("response", response);
+		model.addAllAttributes(queryParamsToMap(params));
 		return "post/list";
 	}
 
@@ -108,7 +110,8 @@ public class PostController {
 	// >>> post - PostService -> findById()의 실행결과(특정 게시글의 상세정보)를 담은 게시글 응답 객체
 	// 화면(HTML)에서는 "${post.변수명}"으로 데이터 접근 <<<
 	@GetMapping("/post/view.do")
-	public String openPostView(@RequestParam(value = "id") final Long id, Model model, HttpSession session) {
+	public String openPostView(@RequestParam(value = "id") final Long id, Model model) {
+		postService.viewCnt(id); // 조회 수 증가
 		PostResponse post = postService.findPostById(id);
 		model.addAttribute("post", post); // "post"가 view.html의 ${post}란 의미로 사용
 		return "post/view"; // write.html, list.html과 마찬가지로 상세 화면(HTML)의 경로를 의미

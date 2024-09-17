@@ -3,7 +3,6 @@ package com.study.domain.post;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.study.common.dto.SearchDto;
 
@@ -68,9 +67,5 @@ public interface PostMapper {
 	 */
 	int count(SearchDto params);
 
-	/**
-	 * 게시글 조회 수
-	 * @param id - PK
-	 */
-	void viewCnt(@RequestParam("id") final Long id);
+	int viewCnt(Long id);
 }

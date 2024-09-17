@@ -4,7 +4,21 @@
  * @returns 종성 포함 여부
  */
 function hasCoda(value) {
-	return ((value.charCodeAt(value.length - 1) - 0xAC00) % 28) > 0;
+    return ((value.charCodeAt(value.length - 1) - 0xAC00) % 28) > 0;
+}
+
+
+function viewCnt(postId) {
+    $.ajax({
+        url: `/api/posts/${postId}/viewCnt`,
+        type: 'post',
+        success: function () {
+            console.log('조회수 증가했습니다.');
+        },
+        error: function (request, status, error) {
+            console.log('조회수 증가 실패:', error);
+        }
+    });
 }
 
 
@@ -16,17 +30,17 @@ function hasCoda(value) {
  * @returns 필드 입력(선택) 여부
  */
 function isValid(target, fieldName, focusTarget) {
-	if (target.value.trim()) {
-		return true;
-	}
-	
-	const particle = (hasCoda(fieldName)) ? '을' : '를'; // 조사
-	const elementType = (target.type === 'text' || target.type === 'password' || target.type === 'search' || target.type === 'textarea') ? '입력' : '선택';
-	alert(`${fieldName + particle} ${elementType}해 주세요.`);
-	
-	target.value = '';
-	(!focusTarget ? target : focusTarget).focus();
-	throw new Error(`"${target.id}" is required...`)
+    if (target.value.trim()) {
+        return true;
+    }
+
+    const particle = (hasCoda(fieldName)) ? '을' : '를'; // 조사
+    const elementType = (target.type === 'text' || target.type === 'password' || target.type === 'search' || target.type === 'textarea') ? '입력' : '선택';
+    alert(`${fieldName + particle} ${elementType}해 주세요.`);
+
+    target.value = '';
+    (!focusTarget ? target : focusTarget).focus();
+    throw new Error(`"${target.id}" is required...`)
 }
 
 
@@ -37,24 +51,24 @@ function isValid(target, fieldName, focusTarget) {
  * @returns json - 결과 데이터
  */
 function getJson(uri, params) {
-	
-	let json = {}
-	
-	$.ajax({
-		url: uri,
-		type: 'get',
-		dataType: 'json',
-		data: params,
-		async: false,
-		success: function (response) {
-			json = response;
-		},
-		error: function (request, status, error) {
-			console.log(error)
-		}
-	})
-	
-	return json;
+
+    let json = {}
+
+    $.ajax({
+        url: uri,
+        type: 'get',
+        dataType: 'json',
+        data: params,
+        async: false,
+        success: function (response) {
+            json = response;
+        },
+        error: function (request, status, error) {
+            console.log(error)
+        }
+    })
+
+    return json;
 }
 
 
@@ -66,23 +80,23 @@ function getJson(uri, params) {
  * @returns json - 결과 데이터
  */
 function callApi(uri, method, params) {
-	
-	let json = {}
-	
-	$.ajax({
-		url: uri,
-		type: method,
-		contentType: 'application/json; charset=utf-8',
-		dataType: 'json',
-		data: (params) ? JSON.stringify(params) : {},
-		async: false,
-		success: function (response) {
-			json = response;
-		},
-		error: function (request, status, error) {
-			console.log(error)
-		}
-	})
-	
-	return json;
+
+    let json = {}
+
+    $.ajax({
+        url: uri,
+        type: method,
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        data: (params) ? JSON.stringify(params) : {},
+        async: false,
+        success: function (response) {
+            json = response;
+        },
+        error: function (request, status, error) {
+            console.log(error)
+        }
+    })
+
+    return json;
 }

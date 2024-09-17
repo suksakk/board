@@ -10,7 +10,9 @@
         <h3>게시판 관리</h3>
         <p class="path"><strong>현재 위치 :</strong> <span>게시판 관리</span> <span>리스트형</span> <span>상세정보</span></p>
     </div>
-
+    <script th:src="@{/js/function.js}"></script>
+    <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+    <script th:src="@{/js/common.js}"></script>
     <div class="content">
         <section>
             <table class="tb tb_row">
@@ -33,7 +35,7 @@
                     <td>[[ ${post.title} ]]</td>
 
                     <th scope="row">조회</th>
-                    <td colspan="3">[[ ${post.viewCnt} ]]</td>
+                    <td colspan="3" th:text="${post.viewCnt}">[[ ${post.viewCnt} ]]</td>
                 </tr>
                 <tr>
                     <th scope="row">이름</th>
@@ -120,7 +122,9 @@
             findAllFile();
 
             findAllComment();
+
         }
+
 
         // 전체 파일 조회
         function findAllFile() {
@@ -168,7 +172,7 @@
             const uriPage = new URLSearchParams(location.search).get('page');
             page = (page) ? page : (uriPage ? Number(uriPage) : 1);
 
-            const postId = [[ ${post.id}]];
+            const postId = [[${post.id}]];
             const uri = `/posts/${postId}/comments`;
             const params = {
                 page: page,
@@ -231,7 +235,7 @@
         // 게시글 삭제
         function deletePost() {
 
-            const id = [[ ${post.id}]];
+            const id = [[${post.id}]];
 
             if (!confirm(id + '번 게시글을 삭제할까요?')) {
                 return false;
@@ -318,7 +322,7 @@
             const content = document.getElementById('content');
             isValid(content, '댓글');
 
-            const postId = [[ ${post.id}]];
+            const postId = [[${post.id}]];
             const uri = `/posts/${postId}/comments`;
             const params = {
                 postId: postId,
@@ -337,7 +341,7 @@
         // 댓글 수정 팝업 open
         function openCommentUpdatePopup(id) {
 
-            const postId = [[ ${post.id}]];
+            const postId = [[${post.id}]];
             const uri = `/posts/${postId}/comments/${id}`;
             const response = getJson(uri);
             document.getElementById('modalWriter').value = response.writer;
@@ -382,7 +386,7 @@
             isValid(writer, '작성자');
             isValid(content, '수정할 내용');
 
-            const postId = [[ ${post.id}]];
+            const postId = [[${post.id}]];
             const uri = `/posts/${postId}/comments/${id}`;
             const params = {
                 id: id,
@@ -407,7 +411,7 @@
                 return false;
             }
 
-            const postId = [[ ${post.id}]];
+            const postId = [[${post.id}]];
             const uri = `/posts/${postId}/comments/${id}`;
             callApi(uri, 'delete');
             alert('삭제되었습니다.');
