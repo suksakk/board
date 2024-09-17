@@ -1,3 +1,4 @@
+// 수정wlqrlqrjwqwr wtf??
 package com.study.domain.post;
 
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class PostController {
 	// 스프링은 과거 컨트롤러 메서드에 URI와 HTTP 요청 메서드를 매핑하기위해 @RequestMapping 사용 value에는 URI method에는 http 요청 메서드 지정 <<<
 	// >>> Model - 메서드의 파라미터로 선언된 Model 인터페이스는 데이터를 화면(HTML)으로 전달하는데 사용 <<<
 	// >>> @RequestParam - 화면(HTML)에서 보낸 파라미터를 전달받는 데 사용
-	// 	ex) 신규게시글을 등록하는 경우에는 게시글 번호가 null로 전송된다. 하지만, 기존게시글을 수정하는 경우
+	// 	ex) 신규게시글을 등록하는 경우에는 게시글 번호가 null로 전송된다. 하지만, 기존게시글을 수정하는 경우. 이거 수정이요
 	// 수정할 게시글 번호(id)가 openPostWrite()의 파라미터로 전송, 전달받은 게시글 번호(id)를 이용 게시글 상세정보 조회후 화면 전달 <<<
 	@GetMapping("/post/write.do")
 	public String openPostWrite(@RequestParam(value = "id", required = false) final Long id, Model model) {
@@ -170,4 +171,5 @@ public class PostController {
 		return showMessageAndRedirect(message, model);
 	}
 
+	// wtf !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
