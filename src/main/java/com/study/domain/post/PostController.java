@@ -1,11 +1,9 @@
-// 수정wlqrlqrjwqwr wtf??
 package com.study.domain.post;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostController {
 
-	@Autowired
 	private final PostService postService;
 	// PostRequest에서 설명했다시피, 파일 업로드는 게시글 생성이 완료 된 후에 처리 되어야 한다
 	// 우선은 PostController의 멤버로 FileService와 FileUtils를 추가
@@ -62,7 +59,7 @@ public class PostController {
 	// 스프링은 과거 컨트롤러 메서드에 URI와 HTTP 요청 메서드를 매핑하기위해 @RequestMapping 사용 value에는 URI method에는 http 요청 메서드 지정 <<<
 	// >>> Model - 메서드의 파라미터로 선언된 Model 인터페이스는 데이터를 화면(HTML)으로 전달하는데 사용 <<<
 	// >>> @RequestParam - 화면(HTML)에서 보낸 파라미터를 전달받는 데 사용
-	// 	ex) 신규게시글을 등록하는 경우에는 게시글 번호가 null로 전송된다. 하지만, 기존게시글을 수정하는 경우. 이거 수정이요
+	// 	ex) 신규게시글을 등록하는 경우에는 게시글 번호가 null로 전송된다. 하지만, 기존게시글을 수정하는 경우.
 	// 수정할 게시글 번호(id)가 openPostWrite()의 파라미터로 전송, 전달받은 게시글 번호(id)를 이용 게시글 상세정보 조회후 화면 전달 <<<
 	@GetMapping("/post/write.do")
 	public String openPostWrite(@RequestParam(value = "id", required = false) final Long id, Model model) {
@@ -81,7 +78,7 @@ public class PostController {
 		// Model 인터페이스의 addAttribute() 메서드 이용하여 화면(HTML)으로 데이터 전달 가능
 		// 해당 메서드는 이름(String name), 값(Object value) 두 개 *파라미터를 필요
 		// 일반적으로 이름과 값은 동일하게 지정해 주는 게 코드를 읽기 유리 HTML에서는 ${} 표현식을 이용해 전달받은 데이터에 접근 가능
-		// String title = "제목", content = "내용", writer = "SAK";
+		//  String title = "제목", content = "내용", writer = "SAK";
 		//   model.addAttribute("t", title);
 		//   model.addAttribute("c", content);
 		//   model.addAttribute("w", writer);
@@ -171,5 +168,4 @@ public class PostController {
 		return showMessageAndRedirect(message, model);
 	}
 
-	// wtf !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

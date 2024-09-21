@@ -1,11 +1,10 @@
 package com.study.interceptor;
 
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 // Interceptor - 무언가를 가로챈다
 // 인터셉터는 컨트롤러의 메서드(URI)에 접근하는 과정에서 무언가를 제어할 필요가 있을 때 사용
@@ -26,8 +25,11 @@ public class LoggerInterceptor implements HandlerInterceptor { // 인터셉터�
 	// 하기 직전에 실행되는 메서드입니다. 우리는 사용자가 어떠한 기능을 수행했는지 파악하기 위해, 해당 메서드(기능)와 매핑된 URI 정보가 로그로 출력처리
 	// HttpServletRequest - 컨트롤러에 인식된 링크값을 가져옴, HttpServletResponse - 인식된 링크값을 응답
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws
-		Exception {
+	public boolean preHandle(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Object handler
+	) throws Exception {
 		log.debug("===============================================");
 		log.debug("==================== BEGIN ====================");
 		log.debug("Request URI ===> " + request.getRequestURI());
@@ -38,10 +40,19 @@ public class LoggerInterceptor implements HandlerInterceptor { // 인터셉터�
 	// preHandle()과 반대로 요청(Request)의 끝을 알리는 로그가 콘솔에 출력되도록 처리
 	// 즉 게시판을 만들고 있으면 게시판 내용을 보여준다.
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-		ModelAndView modelAndView) throws Exception {
+	public void postHandle(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Object handler,
+		ModelAndView modelAndView
+	) throws Exception {
 		log.debug("==================== END ======================");
 		log.debug("===============================================");
-		HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
+		HandlerInterceptor.super.postHandle(
+			request,
+			response,
+			handler,
+			modelAndView
+		);
 	}
 }
