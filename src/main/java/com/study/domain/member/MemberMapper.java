@@ -7,8 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface MemberMapper {
 
-    /**
-     * 회원 정보 저장 (회원가입)
+    /** 회원 정보 저장 (회원가입)
      *
      * @param params - 회원 정보
      */
