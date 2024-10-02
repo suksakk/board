@@ -159,7 +159,7 @@ public class PostController {
 	// 전체 로직 - 게시글 번호(id)를 파라미터로 전달받아 특정 게시글을 삭제합니다.
 	// 여기서 삭제는 테이블상에서의 물리적인 DELETE가 아닌, 삭제 여부 칼럼 상태 값을 변경 하는 논리삭제이다.
 	// 로직 변경 - 기존에는 파라미터로 게시글 번호(id)만 수집, 이전 페이지 정보까지 수집하기 위해서는 SearchDto 타입의 객체인 queryParams를 파라미터로 선언
-	// 추가적으로 message 객체를 생성할 때, 생성자의 마지막 파라미터에 처음 보는 메서드를 전달한다
+	// 추가적으로 message 객체를 생성할 때, 생성자의 마지막 파라미터에 처음 보는 메서드를 전달한다. 여기 수정입니다.
 	@PostMapping("/post/delete.do")
 	public String deletePost(@RequestParam(value = "id") final Long id, final SearchDto queryParams, Model model) {
 		postService.deletePost(id);
