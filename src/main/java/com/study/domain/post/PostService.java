@@ -3,7 +3,6 @@ package com.study.domain.post;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.study.common.dto.SearchDto;
@@ -21,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // 모든 필드에 생성자 자동 생성
 public class PostService {
 
-	@Autowired
 	private final PostMapper postMapper; // 이전 글에서 처리한 게시글 CRUD 기능을 포함하고 있는 Mapper 인터페이스
 
 	@Transactional

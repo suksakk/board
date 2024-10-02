@@ -141,6 +141,7 @@
         <include refid="search"/>
     </select>
 
+    <!-- 게시글 조회 수 증가 -->
     <update id="viewCnt" parameterType="long">
         UPDATE
             tb_post

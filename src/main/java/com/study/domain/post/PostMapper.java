@@ -67,5 +67,9 @@ public interface PostMapper {
 	 */
 	int count(SearchDto params);
 
+	/**
+	 * 게시글 조회 수 증가
+	 * @param id - PK
+	 */
 	int viewCnt(Long id);
 }
