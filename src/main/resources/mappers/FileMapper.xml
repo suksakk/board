@@ -24,14 +24,14 @@
         ...
        ) VALUES
        (
-        ...
+        ... s;ss
        ),
        (
         ...
        ),
        이런식이다 -->
     <insert id="saveAll" parameterType="list">
-        INSERT INTO tb_file (
+        INSERT INTO tb_file (d
         <include refid="fileColumns"/>
         ) VALUES
         <foreach item="file" collection="list" separator=",">
