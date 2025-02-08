@@ -16,7 +16,6 @@ public class MemberService {
 
 	/**
 	 * 로그인
-	 *
 	 * @param loginId  - 로그인 ID
 	 * @param password - 비밀번호
 	 * @return 회원 상세정보
@@ -45,7 +44,6 @@ public class MemberService {
 
 	/**
 	 * 회원 정보 저장 (회원가입)
-	 *
 	 * @param params - 회원 정보
 	 * @return PK
 	 */
@@ -60,7 +58,6 @@ public class MemberService {
 
 	/**
 	 * 회원 상세정보 조회
-	 *
 	 * @param loginId - UK
 	 * @return 회원 상세정보
 	 */
@@ -71,7 +68,6 @@ public class MemberService {
 
 	/**
 	 * 회원 정보 수정
-	 *
 	 * @param params - 회원 정보
 	 * @return PK
 	 */
@@ -86,7 +82,6 @@ public class MemberService {
 
 	/**
 	 * 회원 정보 삭제 (회원 탈퇴)
-	 *
 	 * @param id - PK
 	 * @return PK
 	 */
@@ -99,7 +94,6 @@ public class MemberService {
 
 	/**
 	 * 회원 수 카운팅 (ID 중복 체크)
-	 *
 	 * @param loginId - UK
 	 * @return 회원 수
 	 */
