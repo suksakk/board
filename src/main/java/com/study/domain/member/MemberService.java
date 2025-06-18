@@ -28,7 +28,6 @@ public class MemberService {
 		// member.getPassword()를 실행하면 NPE가 발생하기 때문에 빈 문자열("")로 처리
 		MemberResponse member = findMemberByLoginId(loginId);
 		String encodedPassword = (member == null) ? "" : member.getPassword();
-
 		// 2. 회원 정보 및 비밀번호 체크
 		// passwordEncoder의 matches()로 사용자가 입력한 비밀번호(password)와 회원 테이블에 암호화된 비밀번호(encodePassword)를 비교
 		// 두 조건 모두 false인 경우가 정상적인 케이스
